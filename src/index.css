@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  /* Vibrant colorful brand theme matching the custom light mode request */
+  --color-primary-50: #f4f7ff;
+  --color-primary-100: #e0e9fe;
+  --color-primary-200: #c7d7fe;
+  --color-primary-500: #4f46e5;
+  --color-primary-600: #4338ca;
+  --color-primary-700: #3730a3;
+}
+
+/* Custom Interface Utility Classes with Vibrant Light Mode Colorful Flair */
+.sidebar-active {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(236, 72, 153, 0.12) 100%);
+  border-left: 4px solid #ec4899;
+  box-shadow: inset 0 0 10px rgba(236, 72, 153, 0.05), 0 4px 15px rgba(79, 70, 229, 0.05);
+  color: #4f46e5;
+  font-weight: 800;
+}
+
+/* Gorgeous Light-mode vibrant gradient background mesh */
+.colorful-mesh {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.14) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.14) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+}
+
+.neon-glow-text {
+  background: linear-gradient(135deg, #2563eb 0%, #db2777 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.neon-border-blue {
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.06);
+}
+
+.neon-border-pink {
+  border: 1px solid rgba(236, 72, 153, 0.2);
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.06);
+}
+
+.status-chip {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.priority-high {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+}
+
+.priority-med {
+  color: #d97706;
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+}
+
+.priority-low {
+  color: #059669;
+  background-color: #ecfdf5;
+  border: 1px solid #d1fae5;
+}
+
+/* Scrollbar tweaks */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+

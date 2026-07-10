@@ -1,0 +1,6 @@
+{
+  "name": "Co-working Booking Platform",
+  "description": "A comprehensive web-based platform for discovering and booking workspaces, managing memberships, check-ins, visitors, and auditing activities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
