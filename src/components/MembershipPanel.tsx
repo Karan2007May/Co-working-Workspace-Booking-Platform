@@ -224,93 +224,177 @@ export default function MembershipPanel({
     }, 1500);
   };
 
+  const handleDeactivatePlan = () => {
+    if (confirm("Are you sure you want to deactivate your current subscription plan? Your account role will return to Visitor (Pay-as-you-go).")) {
+      const list = db.getUsers();
+      const updated = list.map((u) => {
+        if (u.id === currentUser.id) {
+          return {
+            ...u,
+            role: 'Visitor' as const,
+            membershipPlanId: undefined,
+            remainingCredits: 0,
+          };
+        }
+        return u;
+      });
+      db.setUsers(updated);
+
+      db.addAuditLog(
+        'Membership Deactivation',
+        currentUser.id,
+        currentUser.name,
+        'Visitor',
+        `Deactivated active membership plan. Downgraded role to Visitor (Pay-as-you-go).`,
+        'Membership Management',
+        undefined,
+        JSON.stringify({ userId: currentUser.id })
+      );
+
+      if (onAddNotification) {
+        onAddNotification(
+          'Membership Deactivated',
+          `Your membership plan has been deactivated. Your account has returned to Visitor (Pay-as-you-go).`,
+          'system'
+        );
+      }
+
+      onRefreshData();
+    }
+  };
+
   return (
     <div id="membership-module" className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Side: Member Status Board */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-gradient-to-br from-blue-950 to-slate-900 text-white rounded-xl shadow-md overflow-hidden p-6 relative border border-slate-800">
-            <div className="absolute right-4 top-4 opacity-10">
-              <Award className="w-32 h-32" />
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-amber-400" />
-                <span className="text-xs uppercase tracking-wider font-mono font-bold text-blue-200">
-                  Subscription Status
-                </span>
+          {isAdmin ? (
+            <div className="bg-gradient-to-br from-indigo-950 to-slate-900 text-white rounded-xl shadow-md overflow-hidden p-6 relative border border-slate-800">
+              <div className="absolute right-4 top-4 opacity-10">
+                <Award className="w-32 h-32" />
               </div>
-
-              {userPlan ? (
-                <div>
-                  <h3 className="text-xl font-bold font-sans">{userPlan.name}</h3>
-                  <p className="text-xs text-blue-200 mt-1">{userPlan.description}</p>
-                </div>
-              ) : (
-                <div>
-                  <h3 className="text-xl font-bold font-sans text-rose-300">No Active Plan</h3>
-                  <p className="text-xs text-slate-300 mt-1">Book on a pay-per-use guest tier.</p>
-                </div>
-              )}
-
-              {/* Remaining credits quota block */}
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/10 flex items-center justify-between mt-2">
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-blue-300" />
-                  <div>
-                    <div className="text-xs text-blue-200 font-sans">Available Booking Credits</div>
-                    <div className="text-[10px] text-blue-300">Refreshes monthly</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-2xl font-extrabold font-mono text-white">
-                    {currentUser.remainingCredits}
+                  <Award className="w-5 h-5 text-indigo-400" />
+                  <span className="text-xs uppercase tracking-wider font-mono font-bold text-indigo-200">
+                    Plan Settings Admin
                   </span>
-                  <span className="text-xs text-blue-200 block">Credits</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold font-sans">System Administrator</h3>
+                  <p className="text-xs text-indigo-200 mt-1">
+                    You are in System Configuration Mode. You can configure and manage the organization-wide subscription tiers.
+                  </p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/10 text-xs text-indigo-100 space-y-2">
+                  <div className="font-bold">Admin Capabilities:</div>
+                  <ul className="list-disc list-inside space-y-1 text-[11px] text-indigo-200">
+                    <li>Configure new pricing tiers</li>
+                    <li>Toggle active plans</li>
+                    <li>Control credit volumes</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="bg-gradient-to-br from-blue-950 to-slate-900 text-white rounded-xl shadow-md overflow-hidden p-6 relative border border-slate-800">
+                <div className="absolute right-4 top-4 opacity-10">
+                  <Award className="w-32 h-32" />
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-5 h-5 text-amber-400" />
+                    <span className="text-xs uppercase tracking-wider font-mono font-bold text-blue-200">
+                      Subscription Status
+                    </span>
+                  </div>
+
+                  {userPlan ? (
+                    <div>
+                      <h3 className="text-xl font-bold font-sans">{userPlan.name}</h3>
+                      <p className="text-xs text-blue-200 mt-1">{userPlan.description}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="text-xl font-bold font-sans text-rose-300">No Active Plan</h3>
+                      <p className="text-xs text-slate-300 mt-1">Book on a pay-per-use guest tier.</p>
+                    </div>
+                  )}
+
+                  {/* Remaining credits quota block */}
+                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/10 flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-5 h-5 text-blue-300" />
+                      <div>
+                        <div className="text-xs text-blue-200 font-sans">Available Booking Credits</div>
+                        <div className="text-[10px] text-blue-300">Refreshes monthly</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-extrabold font-mono text-white">
+                        {currentUser.remainingCredits}
+                      </span>
+                      <span className="text-xs text-blue-200 block">Credits</span>
+                    </div>
+                  </div>
+
+                  {userPlan && (
+                    <div className="text-[10px] text-blue-200 font-mono space-y-1 pt-2">
+                      <div className="flex justify-between">
+                        <span>Valid Term:</span>
+                        <span>{userPlan.validityMonths} Month(s)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Next Renewal Date:</span>
+                        <span>2026-08-01 (Active)</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Warning on Low Credits (BR-4.3) */}
+                  {currentUser.role === 'Member' && currentUser.remainingCredits <= 15 && (
+                    <div className="bg-rose-500/20 border border-rose-500/30 rounded-lg p-3 flex items-start gap-2 text-rose-200 text-xs">
+                      <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-rose-300" />
+                      <span>
+                        <strong>Low Balance Alarm:</strong> Your booking quota is running low! Please recharge or upgrade your plan to prevent booking restrictions.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Deactivate Option (Option for everyone to deactivate their plan and buy another one) */}
+                  {userPlan && (
+                    <div className="pt-2 border-t border-white/10">
+                      <button
+                        id="btn-deactivate-user-plan"
+                        onClick={handleDeactivatePlan}
+                        className="w-full px-4 py-2 bg-rose-600/80 hover:bg-rose-700 text-white font-extrabold text-xs rounded-lg shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <span>Deactivate Current Plan</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
+              {/* Plan Entitlements checklist */}
               {userPlan && (
-                <div className="text-[10px] text-blue-200 font-mono space-y-1 pt-2">
-                  <div className="flex justify-between">
-                    <span>Valid Term:</span>
-                    <span>{userPlan.validityMonths} Month(s)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Next Renewal Date:</span>
-                    <span>2026-08-01 (Active)</span>
+                <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm space-y-3">
+                  <h4 className="text-xs font-bold font-mono text-slate-500 uppercase tracking-wide">
+                    My Plan Entitlements
+                  </h4>
+                  <div className="space-y-2">
+                    {userPlan.entitlements.map((ent, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-xs text-slate-600">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>{ent}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
-
-              {/* Warning on Low Credits (BR-4.3) */}
-              {currentUser.role === 'Member' && currentUser.remainingCredits <= 15 && (
-                <div className="bg-rose-500/20 border border-rose-500/30 rounded-lg p-3 flex items-start gap-2 text-rose-200 text-xs">
-                  <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-rose-300" />
-                  <span>
-                    <strong>Low Balance Alarm:</strong> Your booking quota is running low! Please recharge or upgrade your plan to prevent booking restrictions.
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Plan Entitlements checklist */}
-          {userPlan && (
-            <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm space-y-3">
-              <h4 className="text-xs font-bold font-mono text-slate-500 uppercase tracking-wide">
-                My Plan Entitlements
-              </h4>
-              <div className="space-y-2">
-                {userPlan.entitlements.map((ent, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs text-slate-600">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>{ent}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            </>
           )}
         </div>
 
@@ -532,7 +616,7 @@ export default function MembershipPanel({
                           </div>
                         </div>
 
-                        {currentUser.role === 'Visitor' && plan.status === 'Active' && (
+                        {!isAdmin && !currentUser.membershipPlanId && plan.status === 'Active' && (
                           <button
                             id={`btn-purchase-plan-${plan.id}`}
                             onClick={() => handleInitiatePurchase(plan)}

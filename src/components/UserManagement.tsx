@@ -103,6 +103,15 @@ export default function UserManagement({
       return;
     }
 
+    if (editRole === 'Member' && editMembership === 'none') {
+      alert('Pay-as-you-go (None) is only for Visitors. Members must select an active subscription plan.');
+      return;
+    }
+    if (editRole === 'Visitor' && editMembership !== 'none') {
+      alert('Pay-as-you-go is only for Visitors. If a Visitor has a subscription plan, please change their Security Role to Member first.');
+      return;
+    }
+
     const previousValue = JSON.stringify(editingUser);
     const updatedUsers = allUsers.map((u) => {
       if (u.id === editingUser.id) {
@@ -159,6 +168,15 @@ export default function UserManagement({
     e.preventDefault();
     if (!regName.trim() || !regEmail.trim()) {
       alert('Full Name and Email Address are required.');
+      return;
+    }
+
+    if (regRole === 'Member' && regMembership === 'none') {
+      alert('Pay-as-you-go (None) is only for Visitors. Members must select an active subscription plan.');
+      return;
+    }
+    if (regRole === 'Visitor' && regMembership !== 'none') {
+      alert('Pay-as-you-go is only for Visitors. If a Visitor has a subscription plan, please change their Security Role to Member first.');
       return;
     }
 
@@ -253,6 +271,11 @@ export default function UserManagement({
   const handleDeleteUser = (user: User) => {
     if (user.id === currentUser.id) {
       alert('For security compliance, you are forbidden from deleting your own active Administrator session.');
+      return;
+    }
+
+    if (user.role === 'System Administrator') {
+      alert('For security compliance, you cannot delete a System Administrator account.');
       return;
     }
 
@@ -788,7 +811,7 @@ export default function UserManagement({
                         <button
                           id={`btn-delete-user-${u.id}`}
                           onClick={() => handleDeleteUser(u)}
-                          disabled={isCurrent}
+                          disabled={isCurrent || u.role === 'System Administrator'}
                           className="p-1.5 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded cursor-pointer transition-colors disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-slate-400"
                           title="Delete Account Persona"
                         >

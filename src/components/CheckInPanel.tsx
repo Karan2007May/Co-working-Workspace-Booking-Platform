@@ -38,16 +38,17 @@ export default function CheckInPanel({
   const [associatedBookingId, setAssociatedBookingId] = useState<string>('');
 
   const isStaff = currentUser.role === 'Front Desk Staff' || currentUser.role === 'Facility Manager' || currentUser.role === 'System Administrator';
+  const canAccessReception = currentUser.role === 'Front Desk Staff' || currentUser.role === 'System Administrator';
 
   // Filtered bookings
   const bookingsToDisplay = useMemo(() => {
-    if (isStaff && activeTab === 'staff-desk') {
+    if (canAccessReception && activeTab === 'staff-desk') {
       // Staff see everything, sorted by newest
       return [...bookings].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     }
     // Members/Guests see only their own
     return bookings.filter((b) => b.userId === currentUser.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  }, [bookings, currentUser, isStaff, activeTab]);
+  }, [bookings, currentUser, canAccessReception, activeTab]);
 
   const getWorkspaceName = (wsId: string) => {
     return workspaces.find((w) => w.id === wsId)?.name || 'Unknown Workspace';
@@ -266,7 +267,7 @@ export default function CheckInPanel({
           >
             My Reservations
           </button>
-          {isStaff && (
+          {canAccessReception && (
             <>
               <button
                 id="tab-staff-desk"
@@ -318,7 +319,7 @@ export default function CheckInPanel({
         </div>
       </div>
 
-      {!isStaff && activeTab === 'staff-desk' && (
+      {!canAccessReception && activeTab === 'staff-desk' && (
         <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 rounded-2xl p-8 text-center text-white max-w-2xl mx-auto shadow-2xl relative overflow-hidden my-4">
           <div className="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
           <div className="flex flex-col items-center space-y-4 relative z-10">
@@ -348,7 +349,7 @@ export default function CheckInPanel({
         </div>
       )}
 
-      {!isStaff && activeTab === 'walk-in-visitor' && (
+      {!canAccessReception && activeTab === 'walk-in-visitor' && (
         <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 rounded-2xl p-8 text-center text-white max-w-2xl mx-auto shadow-2xl relative overflow-hidden my-4">
           <div className="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
           <div className="flex flex-col items-center space-y-4 relative z-10">
@@ -378,7 +379,7 @@ export default function CheckInPanel({
         </div>
       )}
 
-      {activeTab === 'walk-in-visitor' && isStaff && (
+      {activeTab === 'walk-in-visitor' && canAccessReception && (
         <div id="walk-in-visitor-form-container" className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden max-w-2xl mx-auto">
           <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-blue-500" />
@@ -455,7 +456,7 @@ export default function CheckInPanel({
         </div>
       )}
 
-      {(activeTab === 'my-bookings' || (activeTab === 'staff-desk' && isStaff)) && (
+      {(activeTab === 'my-bookings' || (activeTab === 'staff-desk' && canAccessReception)) && (
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <h3 className="font-semibold text-slate-800">
