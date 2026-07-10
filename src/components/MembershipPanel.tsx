@@ -184,11 +184,14 @@ export default function MembershipPanel({
     setTimeout(() => {
       // 1. Update user role and subscription
       const list = db.getUsers();
+      const currentRole = currentUser.role;
+      const nextRole = currentRole === 'Visitor' ? 'Member' : currentRole;
+
       const updated = list.map((u) => {
         if (u.id === currentUser.id) {
           return {
             ...u,
-            role: 'Member' as const,
+            role: nextRole,
             membershipPlanId: purchasingPlan!.id,
             remainingCredits: u.remainingCredits + purchasingPlan!.credits,
           };
@@ -202,8 +205,8 @@ export default function MembershipPanel({
         'Membership Purchase',
         currentUser.id,
         currentUser.name,
-        'Member',
-        `Purchased ${purchasingPlan!.name} Membership. Upgraded role to Member. Loaded ${purchasingPlan!.credits} credits.`,
+        nextRole,
+        `Purchased ${purchasingPlan!.name} Membership.${nextRole !== currentRole ? ` Upgraded role from ${currentRole} to ${nextRole}.` : ''} Loaded ${purchasingPlan!.credits} credits.`,
         'Membership Management',
         undefined,
         JSON.stringify({ planId: purchasingPlan!.id, price: purchasingPlan!.price, creditsAdded: purchasingPlan!.credits })
@@ -213,7 +216,7 @@ export default function MembershipPanel({
       if (onAddNotification) {
         onAddNotification(
           'Membership Subscription Confirmed',
-          `Welcome to Co-Space Premium, ${currentUser.name}! Your account is now upgraded to Member and loaded with ${purchasingPlan!.credits} credits.`,
+          `Welcome to Co-Space Premium, ${currentUser.name}! Your account now has the ${purchasingPlan!.name} plan loaded with ${purchasingPlan!.credits} credits.`,
           'system'
         );
       }
@@ -225,13 +228,19 @@ export default function MembershipPanel({
   };
 
   const handleDeactivatePlan = () => {
-    if (confirm("Are you sure you want to deactivate your current subscription plan? Your account role will return to Visitor (Pay-as-you-go).")) {
+    const currentRole = currentUser.role;
+    const nextRole = currentRole === 'Member' ? 'Visitor' : currentRole;
+    const confirmMessage = currentRole === 'Member'
+      ? "Are you sure you want to deactivate your current subscription plan? Your account role will return to Visitor (Pay-as-you-go)."
+      : "Are you sure you want to deactivate your current subscription plan? Your credits will be cleared, but your security role will remain unchanged.";
+
+    if (confirm(confirmMessage)) {
       const list = db.getUsers();
       const updated = list.map((u) => {
         if (u.id === currentUser.id) {
           return {
             ...u,
-            role: 'Visitor' as const,
+            role: nextRole,
             membershipPlanId: undefined,
             remainingCredits: 0,
           };
@@ -244,8 +253,8 @@ export default function MembershipPanel({
         'Membership Deactivation',
         currentUser.id,
         currentUser.name,
-        'Visitor',
-        `Deactivated active membership plan. Downgraded role to Visitor (Pay-as-you-go).`,
+        nextRole,
+        `Deactivated active membership plan.${nextRole !== currentRole ? ` Downgraded role from ${currentRole} to ${nextRole}.` : ''}`,
         'Membership Management',
         undefined,
         JSON.stringify({ userId: currentUser.id })
@@ -254,7 +263,7 @@ export default function MembershipPanel({
       if (onAddNotification) {
         onAddNotification(
           'Membership Deactivated',
-          `Your membership plan has been deactivated. Your account has returned to Visitor (Pay-as-you-go).`,
+          `Your membership plan has been deactivated. ${nextRole === 'Visitor' ? 'Your account has returned to Visitor (Pay-as-you-go).' : 'Your subscription benefits have been removed.'}`,
           'system'
         );
       }
